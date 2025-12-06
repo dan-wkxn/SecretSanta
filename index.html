@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa</title>
+		<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header>
+			<nav>
+				<img id="secret-santa" src="./src/13368698.png">
+			</nav>
+    </header>
+
+		<main>
+			<section id="nameEntryView" class="view">
+				<div class="container">
+					<h1>Welcome to Secret Santa!</h1>
+					<p>Füge deinen Namen hinzu um zu starten</p>
+					<form id="nameForm">
+						<input
+							type="text"
+							id="userName"
+							placeholder="Dein Name"
+							required
+							autocomplete="off"
+						>
+						<button type="submit">Enter</button>
+					</form>
+				</div>
+			</section>
+
+			<section id="drawingView" class="view hidden">
+				<div class="container">
+					<h2>Hi, <span id="displayName"></span></h2>
+					<p>Ready?</p>
+					<button id="drawButton" class="draw-btn">Zieh ein Name</button>
+					<div id="result" class="result hidden">
+						<h3>Du hast:</h3>
+						<p id="drawName" class="draw-name"></p>
+					</div>
+					<div>
+					<button id="resetButton" class="reset-btn">Reset</button>
+					</div>
+				</div>
+			</section>
+		</main>
+		<script src="./main.js"></script>
+</body>
+</html>

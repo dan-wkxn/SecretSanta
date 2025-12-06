@@ -1,0 +1,175 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+nav {
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+nav img {
+    height: 60px;
+    width: auto;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+main {
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.view {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.hidden {
+    display: none;
+}
+
+.container {
+    text-align: center;
+    padding: 3rem;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    margin-top: 0.25rem
+}
+
+#nameForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 100px;
+    margin: 0 auto;
+}
+
+#userName {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+    border: 2px solid #ddd;
+}
+
+#userName:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#nameForm button,
+.draw-btn,
+.reset-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 600;
+}
+
+#nameForm button,
+.draw-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#nameForm button:hover,
+.draw-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#nameForm button:active,
+.draw-btn:active {
+    transform: translateY(0);
+}
+
+.draw-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reset-btn {
+    background: #f0f0f0;
+    color: #666;
+    margin-top: 2rem;
+}
+
+.reset-btn:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.result {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 10px;
+    color: white;
+}
+
+.result h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.draw-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#displayName {
+    color: black;
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 2rem 1.5rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+    }
+
+    .draw-name {
+        font-size: 1.5rem;
+    }
+}
