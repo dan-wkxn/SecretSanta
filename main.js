@@ -109,17 +109,23 @@ resetButton.addEventListener('click', () => {
     }
 });
 
-shareGroupeCodeBtn.addEventListener('click', () => {
-    const groupCode = groupCodeElement.textContent;
-    shareGroupCodeBtn(groupCode);
-});
+if (shareGroupCodeBtn) {
+    shareGroupCodeBtn.addEventListener('click', () => {
+        const groupCode = groupCodeElement.textContent;
+        if (groupCode) {
+            shareGroupCode(groupCode);
+        }
+    });
+}
 
-shareCodeBtn.addEventListener('click', () => {
-    const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
-    if (groupCode) {
-        shareGroupCodeBtn(groupCode);
-    }
-});
+if (shareCodeBtn) {
+    shareCodeBtn.addEventListener('click', () => {
+        const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
+        if (groupCode) {
+            shareGroupCode(groupCode);
+        }
+    });
+}
 
 function shareGroupCode(groupCode) {
     const shareText = `Tritt meiner Secret Santa Gruppe bei! Gruppen-Code: ${groupCode}`;
@@ -162,7 +168,7 @@ function fallbackCopyToClipboard(text) {
     textArea.select();
 
     try {
-        document.exexCommand('copy');
+        document.execCommand('copy');
         alert('Gruppen-Code wurde in die Zwischenablage kopiert!');
     } catch (err) {
         console.log('Fallback copy failed:', err);
