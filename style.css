@@ -56,7 +56,109 @@ h1 {
 p {
     font-size: 1.1rem;
     margin-bottom: 1rem;
-    margin-top: 0.25rem
+    margin-top: 0.25rem;
+}
+
+.group-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.group-btn {
+    padding: 0.5rem 0.25rem;
+    font-size: 1rem;
+    border: 1px solid black;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 600;
+}
+
+.group-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.divider {
+    text-align: center;
+    color: black;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+#joinGroupForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#groupCodeInput {
+    padding: 0.25rem;
+    font-size: 0.85rem;
+    border: 2px solid #ddd;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+#groupCodeInput:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#joinGroupForm button {
+    padding: 0.25rem 1.5rem;
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid black;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 600;
+    width: auto;
+    align-self: center;
+}
+
+#joinGroupForm button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.group-code {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 10px;
+    border: 2px dashed #667eea;
+}
+
+.code {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #667eea;
+    letter-spacing: 0.3rem;
+    margin: 0.5rem 0;
+}
+
+.code-hint {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.group-info {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 1rem;
 }
 
 #nameForm {

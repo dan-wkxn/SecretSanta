@@ -14,10 +14,35 @@
     </header>
 
 		<main>
-			<section id="nameEntryView" class="view">
+			<section id="groupEntryView" class="view">
 				<div class="container">
 					<h1>Welcome to Secret Santa!</h1>
-					<p>Füge deinen Namen hinzu um zu starten</p>
+					<p>Erstelle eine Gruppe oder trete einer bei</p>
+					<div class="group-options">
+						<button id="createGroupBtn" class="group-btn">Neue Gruppe erstellen</button>
+						<p class="divider">oder</p>
+						<form id="joinGroupForm">
+							<input
+								type="text"
+								id="groupCodeInput"
+								placeholder="Gruppen-Code eingeben"
+								required
+								autocomplete="off"
+								maxlength="6"
+							>
+							<button type="submit">Gruppe beitreten</button>
+						</form>
+					</div>
+					<div id="groupCodeDisplay" class="group-code hidden">
+						<p>Dein Gruppen-Code:</p>
+						<p id="groupCode" class="code"></p>
+						<p class="code-hint">Teile diesen Code mit deinen Freunden</p>
+					</div>
+				</div>
+			</section>
+
+			<section id="nameEntryView" class="view hidden">
+				<div class="container">
 					<form id="nameForm">
 						<input
 							type="text"
@@ -34,6 +59,7 @@
 			<section id="drawingView" class="view hidden">
 				<div class="container">
 					<h2>Hi, <span id="displayName"></span></h2>
+					<p id="groupInfo" class="group-info"></p>
 					<p>Ready?</p>
 					<button id="drawButton" class="draw-btn">Zieh ein Name</button>
 					<div id="result" class="result hidden">
