@@ -18,6 +18,8 @@ const drawButton = document.getElementById('drawButton');
 const result = document.getElementById('result');
 const drawNameElement = document.getElementById('drawName');
 const resetButton = document.getElementById('resetButton');
+const shareGroupCodeBtn = document.getElementById('shareGroupCodeBtn');
+const shareCodeBtn = document.getElementById('shareCodeBtn');
 
 //get group specific storage key
 function getGroupStorageKey(groupCode, key) {
@@ -57,7 +59,7 @@ createGroupBtn.addEventListener('click', () => {
 
     setTimeout(() => {
         showNameEntryView();
-    }, 2000);
+    }, 6000);
 });
 
 joinGroupForm.addEventListener('submit', (e) => {
@@ -106,6 +108,69 @@ resetButton.addEventListener('click', () => {
         showGroupEntryView();
     }
 });
+
+shareGroupeCodeBtn.addEventListener('click', () => {
+    const groupCode = groupCodeElement.textContent;
+    shareGroupCodeBtn(groupCode);
+});
+
+shareCodeBtn.addEventListener('click', () => {
+    const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
+    if (groupCode) {
+        shareGroupCodeBtn(groupCode);
+    }
+});
+
+function shareGroupCode(groupCode) {
+    const shareText = `Tritt meiner Secret Santa Gruppe bei! Gruppen-Code: ${groupCode}`;
+    const shareUrl = window.location.href;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Secret Santa Gruppe',
+            text: shareText,
+            url: shareUrl
+        }).catch(err => {
+            console.log('Error sharing:', err);
+            copyToClipboard(shareText);
+        });
+    } else {
+        copyToClipboard(shareText);
+    }
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Gruppen-Code wurde in die Zwischenablage kopiert!');
+        }).catch(err => {
+            console.log('Error copying to clipboard:', err);
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        document.exexCommand('copy');
+        alert('Gruppen-Code wurde in die Zwischenablage kopiert!');
+    } catch (err) {
+        console.log('Fallback copy failed:', err);
+        alert(`Gruppen-Code: ${text.split('Code: ')[1]}`);
+    }
+
+    document.body.removeChild(textArea);
+}
 
 function showGroupEntryView() {
     groupEntryView.classList.remove('hidden');

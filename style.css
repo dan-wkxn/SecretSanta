@@ -161,6 +161,46 @@ p {
     margin-bottom: 1rem;
 }
 
+.share-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    color: #667eea;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    font-weight: 600;
+}
+
+.share-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.share-btn-small {
+    margin: 0.5rem 0 1rem 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    color: #667eea;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    font-weight: 600;
+}
+
+.share-btn-small:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
 #nameForm {
     display: flex;
     flex-direction: column;
