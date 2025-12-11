@@ -18,7 +18,6 @@ const drawButton = document.getElementById('drawButton');
 const result = document.getElementById('result');
 const drawNameElement = document.getElementById('drawName');
 const resetButton = document.getElementById('resetButton');
-const shareGroupCodeBtn = document.getElementById('shareGroupCodeBtn');
 const shareCodeBtn = document.getElementById('shareCodeBtn');
 
 //get group specific storage key
@@ -98,6 +97,18 @@ drawButton.addEventListener('click', () => {
     drawName();
 });
 
+// share code only in drawing view
+if (shareCodeBtn) {
+    shareCodeBtn.addEventListener('click', () => {
+        const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
+        if (groupCode) {
+            shareGroupCode(groupCode);
+        } else {
+            alert('Kein Gruppen-Code gefunden.');
+        }
+    });
+}
+
 resetButton.addEventListener('click', () => {
     if (confirm('Bist du dir sicher?')) {
         localStorage.removeItem(STORAGE_KEY_GROUP);
@@ -109,23 +120,6 @@ resetButton.addEventListener('click', () => {
     }
 });
 
-if (shareGroupCodeBtn) {
-    shareGroupCodeBtn.addEventListener('click', () => {
-        const groupCode = groupCodeElement.textContent;
-        if (groupCode) {
-            shareGroupCode(groupCode);
-        }
-    });
-}
-
-if (shareCodeBtn) {
-    shareCodeBtn.addEventListener('click', () => {
-        const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
-        if (groupCode) {
-            shareGroupCode(groupCode);
-        }
-    });
-}
 
 function shareGroupCode(groupCode) {
     const shareText = `Tritt meiner Secret Santa Gruppe bei! Gruppen-Code: ${groupCode}`;
