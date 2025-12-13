@@ -228,9 +228,54 @@ function drawName() {
     const storedNames = localStorage.getItem(storageKey);
     const names = storedNames ? JSON.parse(storedNames) : [];
     
-    const availableNames = names.filter(name =>
+    // First filter: remove the user's own name
+    let availableNames = names.filter(name =>
         name.toLowerCase() !== savedName.toLowerCase()
     );
+
+    // Special rule: If user's name is a substring of another name,
+    // they can ONLY draw that name (e.g., "Lin" can only draw "Linda")
+    const savedNameLower = savedName.toLowerCase();
+    const matchingName = availableNames.find(name => {
+        const nameLower = name.toLowerCase();
+        // Check if savedName is a substring of this name
+        return nameLower.includes(savedNameLower) && nameLower !== savedNameLower;
+    });
+
+    if (matchingName) {
+        // User can ONLY draw this matching name
+        availableNames = [matchingName];
+    } else {
+        // Filter out names that contain another participant's name as substring
+        // Only that specific participant can draw them
+        availableNames = availableNames.filter(candidateName => {
+            const candidateNameLower = candidateName.toLowerCase();
+            
+            // Check if this candidate name contains any other participant's name as substring
+            for (const participantName of names) {
+                const participantNameLower = participantName.toLowerCase();
+                
+                // Skip if it's the same name or the current user's name
+                if (participantNameLower === candidateNameLower || 
+                    participantNameLower === savedNameLower) {
+                    continue;
+                }
+                
+                // If candidate name contains another participant's name as substring
+                // (e.g., "Linda" contains "Lin")
+                if (candidateNameLower.includes(participantNameLower) && 
+                    candidateNameLower !== participantNameLower) {
+                    // Only that specific participant can draw it
+                    // So if current user is NOT that participant, filter it out
+                    if (savedNameLower !== participantNameLower) {
+                        return false; // Not allowed - only the substring participant can draw
+                    }
+                }
+            }
+            
+            return true; // Allow this name
+        });
+    }
 
     if (availableNames.length === 0) {
         alert('Es ist noch kein Name verfügbar');
