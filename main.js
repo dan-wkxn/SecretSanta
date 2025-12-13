@@ -37,6 +37,22 @@ function generateGroupCode() {
 
 //checks on load if user name already exists
 window.addEventListener('DOMContentLoaded', () => {
+    // Check if there's a group code in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlGroupCode = urlParams.get('code');
+    
+    if (urlGroupCode) {
+        // User came from a shared link, auto-join the group
+        const code = urlGroupCode.toUpperCase().trim();
+        if (code.length === 6) {
+            localStorage.setItem(STORAGE_KEY_GROUP, code);
+            // Clean up URL by removing the code parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+            showNameEntryView();
+            return;
+        }
+    }
+    
     const savedGroup = localStorage.getItem(STORAGE_KEY_GROUP);
     const savedName = localStorage.getItem(STORAGE_KEY_USER);
 
@@ -123,7 +139,9 @@ resetButton.addEventListener('click', () => {
 
 function shareGroupCode(groupCode) {
     const shareText = `Tritt meiner Secret Santa Gruppe bei! Gruppen-Code: ${groupCode}`;
-    const shareUrl = window.location.href;
+    // Include group code in URL so clicking the link auto-joins the group
+    const baseUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${baseUrl}?code=${groupCode}`;
 
     if (navigator.share) {
         navigator.share({
