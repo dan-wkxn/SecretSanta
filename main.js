@@ -1,6 +1,9 @@
-//checks if user name is stored
-const STORAGE_KEY_GROUP = 'secretSantaUserName';
-const STORAGE_KEY_USER = 'secretSantaUserNames';
+// Local storage keys (for current user only)
+const STORAGE_KEY_GROUP = 'secretSantaGroupCode';
+const STORAGE_KEY_USER = 'secretSantaUserName';
+
+// Real-time subscription
+let participantSubscription = null;
 
 const groupEntryView = document.getElementById('groupEntryView');
 const nameEntryView = document.getElementById('nameEntryView');
@@ -19,11 +22,8 @@ const result = document.getElementById('result');
 const drawNameElement = document.getElementById('drawName');
 const resetButton = document.getElementById('resetButton');
 const shareCodeBtn = document.getElementById('shareCodeBtn');
-
-//get group specific storage key
-function getGroupStorageKey(groupCode, key) {
-    return `secretSanta_${groupCode}_${key}`;
-}
+const groupNumber = document.getElementById('groupNumber');
+const participantStatus = document.getElementById('participantStatus');
 
 function generateGroupCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -32,6 +32,120 @@ function generateGroupCode() {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return code;
+}
+
+// Supabase Functions
+async function createGroup(groupCode) {
+    const { data, error } = await supabase
+        .from('groups')
+        .insert([{ group_code: groupCode }])
+        .select()
+        .single();
+    
+    if (error && error.code !== '23505') { // Ignore duplicate key error
+        console.error('Error creating group:', error);
+        return false;
+    }
+    return true;
+}
+
+async function checkGroupExists(groupCode) {
+    const { data, error } = await supabase
+        .from('groups')
+        .select('group_code')
+        .eq('group_code', groupCode)
+        .single();
+    
+    return !error && data !== null;
+}
+
+async function addParticipant(groupCode, name, isReady = false) {
+    const { data, error } = await supabase
+        .from('participants')
+        .insert([{ 
+            group_code: groupCode, 
+            name: name,
+            is_ready: isReady 
+        }])
+        .select()
+        .single();
+    
+    if (error) {
+        // If duplicate, update the existing record
+        if (error.code === '23505') {
+            const { data: updateData, error: updateError } = await supabase
+                .from('participants')
+                .update({ is_ready: isReady })
+                .eq('group_code', groupCode)
+                .eq('name', name)
+                .select()
+                .single();
+            
+            if (updateError) {
+                console.error('Error updating participant:', updateError);
+                return false;
+            }
+            return updateData;
+        }
+        console.error('Error adding participant:', error);
+        return false;
+    }
+    return data;
+}
+
+async function getParticipants(groupCode) {
+    const { data, error } = await supabase
+        .from('participants')
+        .select('*')
+        .eq('group_code', groupCode)
+        .order('created_at', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching participants:', error);
+        return [];
+    }
+    return data || [];
+}
+
+async function saveDrawing(groupCode, drawerName, drawnName) {
+    const { data, error } = await supabase
+        .from('drawings')
+        .insert([{ 
+            group_code: groupCode,
+            drawer_name: drawerName,
+            drawn_name: drawnName
+        }])
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('Error saving drawing:', error);
+        return false;
+    }
+    return data;
+}
+
+function subscribeToParticipants(groupCode, callback) {
+    // Unsubscribe from previous subscription
+    if (participantSubscription) {
+        supabase.removeChannel(participantSubscription);
+    }
+    
+    // Subscribe to changes
+    participantSubscription = supabase
+        .channel(`participants:${groupCode}`)
+        .on('postgres_changes', 
+            { 
+                event: '*', 
+                schema: 'public', 
+                table: 'participants',
+                filter: `group_code=eq.${groupCode}`
+            }, 
+            callback
+        )
+        .subscribe();
+    
+    return participantSubscription;
 }
 
 
@@ -58,6 +172,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (savedGroup && savedName) {
         showDrawingView(savedName, savedGroup);
+        // Set up real-time subscription
+        subscribeToParticipants(savedGroup, (payload) => {
+            updateParticipantStatus(savedGroup);
+            checkIfReadyToDraw(savedGroup);
+        });
     } else if (savedGroup) {
         showNameEntryView();
     } else {
@@ -65,11 +184,22 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-createGroupBtn.addEventListener('click', () => {
+createGroupBtn.addEventListener('click', async () => {
     const groupCode = generateGroupCode();
+    
+    // Create group in Supabase
+    const created = await createGroup(groupCode);
+    if (!created) {
+        alert('Fehler beim Erstellen der Gruppe. Bitte versuche es erneut.');
+        return;
+    }
+    
     localStorage.setItem(STORAGE_KEY_GROUP, groupCode);
 
     groupCodeElement.textContent = groupCode;
+    if (groupNumber) {
+        groupNumber.textContent = `Gruppe #${groupCode}`;
+    }
     groupCodeDisplay.classList.remove('hidden');
 
     setTimeout(() => {
@@ -77,12 +207,19 @@ createGroupBtn.addEventListener('click', () => {
     }, 6000);
 });
 
-joinGroupForm.addEventListener('submit', (e) => {
+joinGroupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const groupCode = groupCodeInput.value.trim().toUpperCase();
 
     if (groupCode.length === 6) {
+        // Check if group exists
+        const exists = await checkGroupExists(groupCode);
+        if (!exists) {
+            alert('Gruppe nicht gefunden. Bitte überprüfe den Code.');
+            return;
+        }
+        
         localStorage.setItem(STORAGE_KEY_GROUP, groupCode);
         groupCodeInput.value = '';
         showNameEntryView();
@@ -91,21 +228,31 @@ joinGroupForm.addEventListener('submit', (e) => {
     }
 });
 
-nameForm.addEventListener('submit', (e) => {
+nameForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name = userNameInput.value.trim();
     const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
 
     if (name && groupCode) {
-        //save name to storage
+        // Save name to localStorage for quick access
         localStorage.setItem(STORAGE_KEY_USER, name);
         
-        //add name to participants list
-        addNameToParticipants(name, groupCode);
+        // Add participant to Supabase and mark as ready
+        const added = await addParticipant(groupCode, name, true);
+        if (!added) {
+            alert('Fehler beim Hinzufügen des Namens. Bitte versuche es erneut.');
+            return;
+        }
 
-        //switch to drawing view
+        // Switch to drawing view
         showDrawingView(name, groupCode);
+        
+        // Set up real-time subscription
+        subscribeToParticipants(groupCode, (payload) => {
+            updateParticipantStatus(groupCode);
+            checkIfReadyToDraw(groupCode);
+        });
     }
 });
 
@@ -205,34 +352,78 @@ function showNameEntryView() {
     userNameInput.focus();
 }
 
-function showDrawingView(name, groupCode) {
+async function showDrawingView(name, groupCode) {
     groupEntryView.classList.add('hidden');
     nameEntryView.classList.add('hidden');
     drawingView.classList.remove('hidden');
     displayName.textContent = name;
     groupInfo.textContent = `Gruppe: ${groupCode}`;
     result.classList.add('hidden');
-}
-
-function addNameToParticipants(name, groupCode) {
-    // Get current participants list
-    const storageKey = getGroupStorageKey(groupCode, 'names');
-    const storedNames = localStorage.getItem(storageKey);
-    const names = storedNames ? JSON.parse(storedNames) : [];
     
-    // Check if name already exists (case-insensitive)
-    const nameExists = names.some(existingName => 
-        existingName.toLowerCase() === name.toLowerCase()
-    );
+    // Update participant status
+    await updateParticipantStatus(groupCode);
     
-    // Add name if it doesn't exist
-    if (!nameExists) {
-        names.push(name);
-        localStorage.setItem(storageKey, JSON.stringify(names));
+    // Check if drawing should be enabled
+    await checkIfReadyToDraw(groupCode);
+    
+    // Check if user already drew
+    const { data: existingDrawing } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('group_code', groupCode)
+        .eq('drawer_name', name)
+        .single();
+    
+    if (existingDrawing) {
+        drawNameElement.textContent = existingDrawing.drawn_name;
+        result.classList.remove('hidden');
+        drawButton.disabled = true;
+        drawButton.textContent = 'Schon gezogen';
     }
 }
 
-function drawName() {
+async function updateParticipantStatus(groupCode) {
+    const participants = await getParticipants(groupCode);
+    const total = participants.length;
+    const ready = participants.filter(p => p.is_ready).length;
+    
+    if (participantStatus) {
+        if (total === 0) {
+            participantStatus.textContent = 'Warte auf Teilnehmer...';
+        } else {
+            participantStatus.textContent = `${ready} von ${total} Teilnehmern bereit`;
+        }
+    }
+}
+
+async function checkIfReadyToDraw(groupCode) {
+    const participants = await getParticipants(groupCode);
+    const total = participants.length;
+    const ready = participants.filter(p => p.is_ready).length;
+    const allReady = total > 0 && total === ready;
+    
+    if (drawButton) {
+        if (allReady && total > 1) {
+            drawButton.disabled = false;
+            drawButton.textContent = 'Zieh ein Name';
+        } else {
+            drawButton.disabled = true;
+            if (total <= 1) {
+                drawButton.textContent = 'Warte auf weitere Teilnehmer';
+            } else {
+                drawButton.textContent = `Warte auf ${total - ready} Teilnehmer`;
+            }
+        }
+    }
+}
+
+// This function is now handled by addParticipant in Supabase
+// Keeping for backwards compatibility but it's not used directly
+async function addNameToParticipants(name, groupCode) {
+    return await addParticipant(groupCode, name, true);
+}
+
+async function drawName() {
     const savedName = localStorage.getItem(STORAGE_KEY_USER);
     const groupCode = localStorage.getItem(STORAGE_KEY_GROUP);
 
@@ -241,10 +432,38 @@ function drawName() {
         return;
     }
     
-    // Get names from localStorage
-    const storageKey = getGroupStorageKey(groupCode, 'names');
-    const storedNames = localStorage.getItem(storageKey);
-    const names = storedNames ? JSON.parse(storedNames) : [];
+    // Get participants from Supabase
+    const participants = await getParticipants(groupCode);
+    const names = participants.map(p => p.name);
+    const ready = participants.filter(p => p.is_ready);
+    
+    // Check if all participants are ready
+    const allReady = names.length > 0 && names.length === ready.length;
+    
+    if (!allReady || names.length <= 1) {
+        const missing = names.length - ready.length;
+        alert(`Noch nicht alle Teilnehmer haben ihren Namen eingegeben. Es fehlen noch ${missing} Teilnehmer.`);
+        await updateParticipantStatus(groupCode);
+        await checkIfReadyToDraw(groupCode);
+        return;
+    }
+    
+    // Check if user has already drawn
+    const { data: existingDrawing } = await supabase
+        .from('drawings')
+        .select('*')
+        .eq('group_code', groupCode)
+        .eq('drawer_name', savedName)
+        .single();
+    
+    if (existingDrawing) {
+        // User already drew, show their result
+        drawNameElement.textContent = existingDrawing.drawn_name;
+        result.classList.remove('hidden');
+        drawButton.disabled = true;
+        drawButton.textContent = 'Schon gezogen';
+        return;
+    }
     
     // First filter: remove the user's own name
     let availableNames = names.filter(name =>
@@ -302,6 +521,13 @@ function drawName() {
 
     const randomIndex = Math.floor(Math.random() * availableNames.length);
     const selectedName = availableNames[randomIndex];
+
+    // Save drawing to Supabase
+    const saved = await saveDrawing(groupCode, savedName, selectedName);
+    if (!saved) {
+        alert('Fehler beim Speichern der Ziehung. Bitte versuche es erneut.');
+        return;
+    }
 
     drawNameElement.textContent = selectedName;
     result.classList.remove('hidden');

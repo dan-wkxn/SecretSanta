@@ -163,6 +163,20 @@ p {
     font-weight: 600;
 }
 
+.group-number {
+    font-size: 1rem;
+    color: #667eea;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.participant-status {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
 .share-btn:hover {
     background: #667eea;
     color: white;
