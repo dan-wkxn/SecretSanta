@@ -16,11 +16,10 @@
     border: 2px solid #ddd;
     border-radius: 8px;
     text-align: center;
-    width: 60px;
 }
 
 #groupSizeInput {
-    width: 60px;
+    width: 60px !important;
 }
 
 .group-size input:focus {
