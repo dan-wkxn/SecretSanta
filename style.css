@@ -1,7 +1,25 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+
+.group-size {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 300px;
+    margin: 0 auto;
+}
+.group-size label {
+    font-size: 1rem;
+    color: black;
+}
+.group-size input {
+    padding: 0.25rem;
+    font-size: 0.85rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+}
+.group-size input:focus {
+    outline: none;
+    border-color: #667eea;
 }
 
 body {
@@ -172,7 +190,7 @@ p {
 
 .participant-status {
     font-size: 0.85rem;
-    color: #666;
+    color: black;
     margin-bottom: 0.5rem;
     font-weight: 500;
 }

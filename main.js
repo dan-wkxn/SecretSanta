@@ -25,6 +25,25 @@ const shareCodeBtn = document.getElementById('shareCodeBtn');
 const groupNumber = document.getElementById('groupNumber');
 const participantStatus = document.getElementById('participantStatus');
 
+document.getElementById(`createGroupBtn`).addEventListener('click', function() {
+    const groupSize = parseInt(document.getElementById('groupSizeInput').value, 10);
+
+    let participants = [];
+    for (let i = 1; i <= groupSize; i++) {
+        participants.push('Person ' + i);
+    }
+
+    let shuffled = [...participants];
+    shuffled.sort(() => Math.random() - 0.5);
+
+    let assignments = {};
+    for (let i = 0; i < groupSize; i++) {
+        assignments[participants[i]] = shuffled[(i + 1) % groupSize];
+    }
+
+    console.log(assignments);
+});
+
 function generateGroupCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -55,8 +74,13 @@ async function checkGroupExists(groupCode) {
         .select('group_code')
         .eq('group_code', groupCode)
         .single();
+
+    if (error) {
+        console.error('Error checking group:', error);
+        return false;
+    }
     
-    return !error && data !== null;
+    return !!data;
 }
 
 async function addParticipant(groupCode, name, isReady = false) {
@@ -204,7 +228,7 @@ createGroupBtn.addEventListener('click', async () => {
 
     setTimeout(() => {
         showNameEntryView();
-    }, 6000);
+    }, 4000);
 });
 
 joinGroupForm.addEventListener('submit', async (e) => {
