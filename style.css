@@ -22,6 +22,8 @@
 
 #groupSizeInput {
     width: 60px !important;
+    align-items: center;
+    text-align: center;
 }
 
 .group-size input:focus {
