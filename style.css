@@ -16,7 +16,13 @@
     border: 2px solid #ddd;
     border-radius: 8px;
     text-align: center;
+    width: 60px;
 }
+
+#groupSizeInput {
+    width: 60px;
+}
+
 .group-size input:focus {
     outline: none;
     border-color: #667eea;
