@@ -25,6 +25,26 @@ const shareCodeBtn = document.getElementById('shareCodeBtn');
 const groupNumber = document.getElementById('groupNumber');
 const participantStatus = document.getElementById('participantStatus');
 
+// Check if user already joined a group
+const savedGroupCode = localStorage.getItem(STORAGE_KEY_GROUP);
+const savedUserName = localStorage.getItem(STORAGE_KEY_USER);
+
+if (savedGroupCode && savedUserName) {
+    // Hide entry views
+    groupEntryView.style.display = 'none';
+    nameEntryView.style.display = 'none';
+    // Show drawing view
+    drawingView.style.display = 'block';
+    // Optionally, set display name and group info
+    displayName.textContent = savedUserName;
+    groupInfo.textContent = `Gruppe: ${savedGroupCode}`;
+} else {
+    // Show entry views as normal
+    groupEntryView.style.display = 'block';
+    nameEntryView.style.display = 'none';
+    drawingView.style.display = 'none';
+}
+
 document.getElementById(`createGroupBtn`).addEventListener('click', function() {
     const groupSize = parseInt(document.getElementById('groupSizeInput').value, 10);
 
