@@ -1,3 +1,6 @@
+
+
+
 // Local storage keys (for current user only)
 const STORAGE_KEY_GROUP = 'secretSantaGroupCode';
 const STORAGE_KEY_USER = 'secretSantaUserName';
@@ -24,6 +27,8 @@ const resetButton = document.getElementById('resetButton');
 const shareCodeBtn = document.getElementById('shareCodeBtn');
 const groupNumber = document.getElementById('groupNumber');
 const participantStatus = document.getElementById('participantStatus');
+
+
 
 // Check if user already joined a group
 const savedGroupCode = localStorage.getItem(STORAGE_KEY_GROUP);
@@ -298,6 +303,23 @@ nameForm.addEventListener('submit', async (e) => {
             checkIfReadyToDraw(groupCode);
         });
     }
+});
+
+nameForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userName = userNameInput.value.trim();
+    if (!userName) return;
+
+    // ... your logic to join group ...
+
+    // Save to localStorage
+    localStorage.setItem(STORAGE_KEY_GROUP, groupCodeInput.value.trim().toUpperCase());
+    localStorage.setItem(STORAGE_KEY_USER, userName);
+
+    // Show drawing view, hide entry views
+    groupEntryView.style.display = 'none';
+    nameEntryView.style.display = 'none';
+    drawingView.style.display = 'block';
 });
 
 drawButton.addEventListener('click', () => {
