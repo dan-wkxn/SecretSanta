@@ -44,7 +44,6 @@ if (savedGroupCode && savedUserName) {
     displayName.textContent = savedUserName;
     groupInfo.textContent = `Gruppe: ${savedGroupCode}`;
     // Check if the user is ready to draw
-    await checkIfReadyToDraw(savedGroupCode);
 } else {
     // Show entry views as normal
     groupEntryView.style.display = 'block';
